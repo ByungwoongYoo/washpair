@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>WashPair</title>
+  <style>
+    * { box-sizing: border-box; }
+    body { margin: 0; background: #f4f7f5; color: #192d2a; font: 1rem/1.55 "Instrument Sans", sans-serif; }
+    main { width: min(100% - 2rem, 42rem); margin: 3rem auto; }
+    h1 { font-size: 3rem; line-height: 1; margin-block: 0 .6rem; }
+    form, section { background: white; border: 1px solid #c6d5cf; border-radius: .75rem; padding: 1.2rem; margin-top: 1rem; }
+    label { display: block; margin-bottom: .75rem; }
+    textarea { display: block; width: 100%; margin-top: .25rem; padding: .6rem; border: 1px solid #6b8178; border-radius: .25rem; font: inherit; }
+    button { padding: .65rem 1rem; background: #164f43; color: white; border: 0; border-radius: .25rem; font: inherit; }
+    button:disabled { opacity: .55; }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>WashPair</h1>
+    <p>Compare the washing limits printed on two care labels.</p>
+    <form id="check-labels">
+      <label>First label <textarea id="first" required maxlength="300" rows="2">Machine wash gentle at 30°C. Line dry.</textarea></label>
+      <label>Second label <textarea id="second" required maxlength="300" rows="2">Machine wash at 40°C. Do not bleach.</textarea></label>
+      <label><input type="checkbox" id="cloud"> Allow cloud fallback for these label texts</label>
+      <button>Compare labels</button>
+    </form>
+    <section id="result" aria-live="polite" hidden></section>
+  </main>
+  <script type="module" src="/main.mjs"></script>
+</body>
+</html>

@@ -1,14 +1,16 @@
 # WashPair
 
-A shared load needs a temperature that both care labels allow. WashPair finds the washing line on each label, shows the text it used, and calculates the lower of the two stated Celsius limits. A separate-wash instruction or an unclear label sends the user back to the original label. Check the remaining fabric, colour, cycle and drying instructions before washing.
+WashPair brings the washing instructions on two English care labels into one view. It keeps separate-wash requirements, washing restrictions and other conditions beside the quoted source text. When both labels contain a supported Celsius washing limit, the result shows the lower ceiling. The user checks the cycle, colours and fabrics before combining garments.
+
+The request sends numbered instruction segments to Firebase AI Logic for role tags. Application code binds the tags to the original segments and checks each complete instruction against its supported phrase set. Unsupported wording or conflicting requirements returns a request to review the labels without selecting a temperature.
 
 ## Run on localhost
 
-Use desktop Chrome and Node.js 22.12 or later. Chrome needs an eligible device to download and run its local model. See the [Chrome hardware requirements](https://developer.chrome.com/docs/ai/get-started).
+Use desktop Chrome and Node.js 22.12 or later. On-device inference needs an eligible device and a downloaded local model; see the [Chrome hardware requirements](https://developer.chrome.com/docs/ai/get-started).
 
-1. Register a Web app in a Firebase project and enable Firebase AI Logic with the Gemini Developer API. Set up Firebase App Check for that Web app.
-2. Copy `.env.example` to `.env.local`. Fill in the Firebase Web API key, project ID, Web app ID and reCAPTCHA Enterprise site key. For a private localhost test, you can set `VITE_FIREBASE_APPCHECK_DEBUG=true` and register the browser-generated debug token in your own App Check configuration. Keep the debug token private. Use a registered reCAPTCHA Enterprise provider for the public host with debug mode off.
-3. Run these commands from the repository root.
+1. Register a Firebase Web app, enable Firebase AI Logic with the Gemini Developer API, and configure App Check.
+2. Copy `.env.example` to `.env.local` and fill in the four Firebase Web app and reCAPTCHA Enterprise values. For a private localhost test, set `VITE_FIREBASE_APPCHECK_DEBUG=true` and register the browser-generated debug token in your own Firebase project. Keep the token private.
+3. Run:
 
 ```sh
 npm ci
@@ -16,13 +18,20 @@ npm test
 npm run dev -- --host 127.0.0.1
 ```
 
-Open the localhost URL printed by Vite. Paste the two English washing labels or use the prefilled example, then select **Compare labels**. If Chrome needs to download its local model, complete the download before retrying.
+Open Vite's localhost URL, enter two labels and select **Compare labels**. The default requests `ONLY_ON_DEVICE`. Selecting **Allow cloud fallback for these label texts** changes the request to `PREFER_ON_DEVICE`. The result identifies the execution source when the SDK supplies it.
 
-## Try the two inference paths
+`npm test` includes the original eight tests and 30 candidate tests. These tests inject responses and check parsing, conflicts and presentation; they do not execute Firebase inference.
 
-- Leave cloud fallback unchecked to request `ONLY_ON_DEVICE`. On an eligible Chrome desktop with the local model ready, the example returned **30°C** and **Read on this device**.
-- On a device where the local model is unavailable, check **Allow cloud fallback for these label texts** and run the same example. `PREFER_ON_DEVICE` lets Firebase AI Logic use Gemini 3.5 Flash-Lite in the cloud when on-device inference is unavailable. This path returned **30°C** and **Read using cloud fallback**.
+## Build and deploy
 
-The Firebase SDK reports the inference source. WashPair checks the model's quoted text against the entered labels and calculates the ceiling in application code. The result shows the washing line used from each label.
+```sh
+npm run build
+```
 
-Run `npm run build` to produce `dist/`. Keep `.env.local`, debug tokens and deployment credentials out of source control.
+Vite writes the static application to `dist/`; `firebase.json` serves that directory. For public hosting, use the reCAPTCHA Enterprise key registered for the exact production domain and leave debug mode off. Keep `.env.local`, debug tokens and deployment credentials out of source control.
+
+With the [Firebase CLI](https://firebase.google.com/docs/hosting/quickstart) installed and authenticated to your own project, deploy only the Hosting content:
+
+```sh
+firebase deploy --only hosting --project YOUR_PROJECT_ID
+```
